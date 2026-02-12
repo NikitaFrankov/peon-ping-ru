@@ -6,10 +6,12 @@ set -euo pipefail
 
 LOCAL_MODE=false
 INSTALL_ALL=false
+CUSTOM_PACKS=""
 for arg in "$@"; do
   case "$arg" in
     --local) LOCAL_MODE=true ;;
     --all) INSTALL_ALL=true ;;
+    --packs=*) CUSTOM_PACKS="${arg#--packs=}" ;;
   esac
 done
 
@@ -184,7 +186,10 @@ else
 fi
 
 # Select packs to install
-if [ "$INSTALL_ALL" = true ]; then
+if [ -n "$CUSTOM_PACKS" ]; then
+  PACKS=$(echo "$CUSTOM_PACKS" | tr ',' ' ')
+  echo "Installing custom packs: $PACKS"
+elif [ "$INSTALL_ALL" = true ]; then
   PACKS="$ALL_PACKS"
   echo "Installing all $(echo "$PACKS" | wc -l | tr -d ' ') packs..."
 else

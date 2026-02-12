@@ -264,3 +264,25 @@ print('OK')
   [ -f "$INSTALL_DIR/packs/peon/openpeon.json" ]
   [ ! -f "$INSTALL_DIR/packs/peon/manifest.json" ]
 }
+
+@test "--packs installs only specified packs" {
+  bash "$CLONE_DIR/install.sh" --packs=peon,glados
+  [ -d "$INSTALL_DIR/packs/peon" ]
+  [ -d "$INSTALL_DIR/packs/glados" ]
+  # Should NOT have other default packs
+  [ ! -d "$INSTALL_DIR/packs/peasant" ]
+  [ ! -d "$INSTALL_DIR/packs/duke_nukem" ]
+}
+
+@test "--packs with single pack works" {
+  bash "$CLONE_DIR/install.sh" --packs=peon
+  [ -d "$INSTALL_DIR/packs/peon" ]
+  pack_count=$(ls -d "$INSTALL_DIR/packs/"*/ 2>/dev/null | wc -l | tr -d ' ')
+  [ "$pack_count" -eq 1 ]
+}
+
+@test "--packs overrides default pack list" {
+  bash "$CLONE_DIR/install.sh" --packs=glados
+  [ -d "$INSTALL_DIR/packs/glados" ]
+  [ ! -d "$INSTALL_DIR/packs/peon" ]
+}
