@@ -21,7 +21,7 @@ SETTINGS="$BASE_DIR/settings.json"
 REPO_BASE="https://raw.githubusercontent.com/PeonPing/peon-ping/main"
 
 # All available sound packs (add new packs here)
-PACKS="acolyte_ru glados peon peon_cz peon_fr peon_pl peon_ru peasant peasant_cz peasant_fr peasant_ru ra2_soviet_engineer sc_battlecruiser sc_firebat sc_kerrigan sc_medic sc_scv sc_tank sc_terran sc_vessel tf2_engineer"
+PACKS="acolyte_ru glados peon peon_cz peon_es peon_fr peon_pl peon_ru peasant peasant_cz peasant_es peasant_fr peasant_ru ra2_soviet_engineer sc_battlecruiser sc_firebat sc_kerrigan sc_medic sc_scv sc_tank sc_terran sc_vessel tf2_engineer"
 
 # --- Platform detection ---
 detect_platform() {
