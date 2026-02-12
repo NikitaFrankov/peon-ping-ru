@@ -3,29 +3,38 @@
 ![macOS](https://img.shields.io/badge/macOS-blue) ![WSL2](https://img.shields.io/badge/WSL2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-hook-ffab01)
+![StarCraft Terran](https://img.shields.io/badge/StarCraft-Terran-red)
 
-**Your Peon pings you when Claude Code needs attention.**
+> **🎮 StarCraft Terran Edition** - This fork features StarCraft Terran unit voice lines instead of Warcraft III sounds.
 
-Claude Code doesn't notify you when it finishes or needs permission. You tab away, lose focus, and waste 15 minutes getting back into flow. peon-ping fixes this with Warcraft III Peon voice lines — so you never miss a beat, and your terminal sounds like Orgrimmar.
+**Your units ping you when Claude Code needs attention.**
+
+Claude Code doesn't notify you when it finishes or needs permission. You tab away, lose focus, and waste 15 minutes getting back into flow. peon-ping fixes this with **StarCraft Terran unit voice lines** — so you never miss a beat, and your terminal sounds like Mar Sara.
 
 **See it in action** &rarr; [peon-ping.vercel.app](https://peon-ping.vercel.app/)
 
 ## Install
 
+**StarCraft Terran Edition:**
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tonyyont/peon-ping/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/workdd/peon-ping/feature/terran-sound-packs/install.sh | bash
 ```
 
 One command. Takes 10 seconds. macOS and WSL2 (Windows). Re-run to update (sounds and config preserved).
 
+> **Note**: This is a fork of the [original peon-ping](https://github.com/tonyyont/peon-ping) with StarCraft Terran voices.
+
 ## What you'll hear
+
+**StarCraft Terran Edition** features iconic unit voices from the Terran faction:
 
 | Event | Sound | Examples |
 |---|---|---|
-| Session starts | Greeting | *"Ready to work?"*, *"Yes?"*, *"What you want?"* |
-| Task finishes | Acknowledgment | *"Work, work."*, *"I can do that."*, *"Okie dokie."* |
-| Permission needed | Alert | *"Something need doing?"*, *"Hmm?"*, *"What you want?"* |
-| Rapid prompts (3+ in 10s) | Easter egg | *"Me busy, leave me alone!"* |
+| Session starts | Greeting | *"Good to go, sir"* (SCV), *"Ready to roll out"* (Siege Tank), *"Need a light?"* (Firebat) |
+| Task finishes | Acknowledgment | *"Affirmative"* (SCV), *"Done and done"* (Tank), *"All patched up!"* (Medic) |
+| Permission needed | Alert | *"I read you"* (SCV), *"Orders received"* (Tank), *"Receiving"* (Vessel) |
+| Rapid prompts (3+ in 10s) | Easter egg | *Coming soon!* |
 
 Plus Terminal tab titles (`● project: done`) and desktop notifications when your terminal isn't focused.
 
@@ -78,6 +87,18 @@ Edit `~/.claude/hooks/peon-ping/config.json`:
 
 ## Sound packs
 
+### 🎮 StarCraft Terran Units (New!)
+
+| Pack | Unit | Sounds | By |
+|---|---|---|---|
+| `sc_scv` | SCV | "Good to go, sir", "Affirmative", "I read you" | [@workdd](https://github.com/workdd) |
+| `sc_firebat` | Firebat | "Need a light?", "Ready to roast!", "Fueled up!" | [@workdd](https://github.com/workdd) |
+| `sc_medic` | Medic | "The doctor is in", "Where does it hurt?", "All patched up!" | [@workdd](https://github.com/workdd) |
+| `sc_tank` | Siege Tank | "Ready to roll out", "Absolutely", "Done and done" | [@workdd](https://github.com/workdd) |
+| `sc_vessel` | Science Vessel | "Explorer reporting", "Receiving", "Affirmative" | [@workdd](https://github.com/workdd) |
+
+### Original Packs (from upstream)
+
 | Pack | Character | Sounds | By |
 |---|---|---|---|
 | `peon` (default) | Orc Peon (Warcraft III) | "Ready to work?", "Work, work.", "Okie dokie." | [@tonyyont](https://github.com/tonyyont) |
@@ -88,11 +109,6 @@ Edit `~/.claude/hooks/peon-ping/config.json`:
 | `ra2_soviet_engineer` | Soviet Engineer (Red Alert 2) | "Tools ready", "Yes, commander", "Engineering" | [@msukkari](https://github.com/msukkari) |
 | `sc_battlecruiser` | Battlecruiser (StarCraft) | "Battlecruiser operational", "Make it happen", "Engage" | [@garysheng](https://github.com/garysheng) |
 | `sc_kerrigan` | Sarah Kerrigan (StarCraft) | "I gotcha", "What now?", "Easily amused, huh?" | [@garysheng](https://github.com/garysheng) |
-| `sc_scv` | SCV (StarCraft) | "Good to go, sir", "Affirmative", "I read you" | [@workdd](https://github.com/workdd) |
-| `sc_firebat` | Firebat (StarCraft) | "Need a light?", "Ready to roast!", "Fueled up!" | [@workdd](https://github.com/workdd) |
-| `sc_medic` | Medic (StarCraft) | "The doctor is in", "Where does it hurt?", "All patched up!" | [@workdd](https://github.com/workdd) |
-| `sc_tank` | Siege Tank (StarCraft) | "Ready to roll out", "Absolutely", "Done and done" | [@workdd](https://github.com/workdd) |
-| `sc_vessel` | Science Vessel (StarCraft) | "Explorer reporting", "Receiving", "Affirmative" | [@workdd](https://github.com/workdd) |
 
 Switch packs from the CLI:
 
