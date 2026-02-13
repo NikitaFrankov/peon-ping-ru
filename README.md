@@ -288,6 +288,7 @@ Sound packs are downloaded from the [OpenPeon registry](https://github.com/PeonP
 
 ## Links
 
+- [@peonping on X](https://x.com/peonping) — updates and announcements
 - [peonping.com](https://peonping.com/) — landing page
 - [openpeon.com](https://openpeon.com/) — CESP spec, pack browser, creation guide
 - [OpenPeon registry](https://github.com/PeonPing/registry) — pack registry (GitHub Pages)
