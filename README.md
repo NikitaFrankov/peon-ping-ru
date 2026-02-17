@@ -119,6 +119,7 @@ peon packs list --registry # Browse all available packs in the registry
 peon packs install <p1,p2> # Install packs from the registry
 peon packs install --all  # Install all packs from the registry
 peon packs use <name>     # Switch to a specific pack
+peon packs use --install <name>  # Switch to pack, installing from registry if needed
 peon packs next           # Cycle to the next pack
 peon packs remove <p1,p2> # Remove specific packs
 peon notifications on     # Enable desktop notifications
@@ -493,6 +494,7 @@ Install all with `--all`, or switch packs anytime:
 
 ```bash
 peon packs use glados             # switch to a specific pack
+peon packs use --install glados   # install (or update) and switch in one step
 peon packs next                   # cycle to the next pack
 peon packs list                   # list all installed packs
 peon packs list --registry        # browse all available packs

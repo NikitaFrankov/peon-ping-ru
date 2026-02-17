@@ -792,10 +792,37 @@ for d in sorted(os.listdir(packs_dir)):
 "
         exit 0 ;;
       use)
-        PACK_ARG="${3:-}"
+        # Parse --install flag and pack name from args 3/4
+        USE_INSTALL=0
+        PACK_ARG=""
+        for arg in "${3:-}" "${4:-}"; do
+          case "$arg" in
+            --install) USE_INSTALL=1 ;;
+            "") ;;
+            *) PACK_ARG="$arg" ;;
+          esac
+        done
         if [ -z "$PACK_ARG" ]; then
-          echo "Usage: peon packs use <name>" >&2; exit 1
+          echo "Usage: peon packs use <name> [--install]" >&2; exit 1
         fi
+
+        # Check if pack exists locally
+        PACK_EXISTS=0
+        PACKS_DIR="$PEON_DIR/packs"
+        if [ -d "$PACKS_DIR/$PACK_ARG" ] && { [ -f "$PACKS_DIR/$PACK_ARG/openpeon.json" ] || [ -f "$PACKS_DIR/$PACK_ARG/manifest.json" ]; }; then
+          PACK_EXISTS=1
+        fi
+
+        # If pack missing (or --install always fetches), download it
+        if [ "$USE_INSTALL" -eq 1 ]; then
+          PACK_DL="$PEON_DIR/scripts/pack-download.sh"
+          if [ ! -f "$PACK_DL" ]; then
+            echo "Error: pack-download.sh not found. Run 'peon update' to fix." >&2
+            exit 1
+          fi
+          bash "$PACK_DL" --dir="$PEON_DIR" --packs="$PACK_ARG" || exit 1
+        fi
+
         PACK_ARG="$PACK_ARG" python3 -c "
 import json, os, glob, sys
 config_path = '$CONFIG'
@@ -1363,6 +1390,7 @@ Pack management:
   packs install <p1,p2>   Download and install new packs
   packs install --all     Download all packs from registry
   packs use <name>        Switch to a specific pack
+  packs use --install <n> Switch to pack, installing from registry if needed
   packs next              Cycle to the next pack
   packs remove <p1,p2>    Remove specific packs
   packs remove --all      Remove all packs except the active one

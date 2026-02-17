@@ -633,6 +633,45 @@ json.dump(c, open('$TEST_DIR/config.json', 'w'), indent=2)
 }
 
 # ============================================================
+# packs use --install
+# ============================================================
+
+@test "packs use --install downloads and switches to absent pack" {
+  setup_pack_download_env
+  run bash "$PEON_SH" packs use --install test_pack_a
+  [ "$status" -eq 0 ]
+  [ -d "$TEST_DIR/packs/test_pack_a" ]
+  [ -f "$TEST_DIR/packs/test_pack_a/openpeon.json" ]
+  [[ "$output" == *"switched to test_pack_a"* ]]
+  active=$(/usr/bin/python3 -c "import json; print(json.load(open('$TEST_DIR/config.json'))['active_pack'])")
+  [ "$active" = "test_pack_a" ]
+}
+
+@test "packs use --install re-downloads already-installed pack" {
+  setup_pack_download_env
+  run bash "$PEON_SH" packs use --install sc_kerrigan
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"switched to sc_kerrigan"* ]]
+  active=$(/usr/bin/python3 -c "import json; print(json.load(open('$TEST_DIR/config.json'))['active_pack'])")
+  [ "$active" = "sc_kerrigan" ]
+}
+
+@test "packs use <name> --install works (flag after name)" {
+  setup_pack_download_env
+  run bash "$PEON_SH" packs use test_pack_a --install
+  [ "$status" -eq 0 ]
+  [ -d "$TEST_DIR/packs/test_pack_a" ]
+  [[ "$output" == *"switched to test_pack_a"* ]]
+}
+
+@test "packs use --install errors when pack-download.sh missing" {
+  # Don't call setup_pack_download_env — no scripts/ dir
+  run bash "$PEON_SH" packs use --install test_pack_a
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"pack-download.sh not found"* ]]
+}
+
+# ============================================================
 # packs next (cycle, no argument)
 # ============================================================
 
