@@ -1,0 +1,218 @@
+#!/usr/bin/env bats
+
+load setup.bash
+
+setup() {
+  setup_test_env
+  export PLATFORM=mac
+
+  # Enable desktop notifications in config
+  cat > "$TEST_DIR/config.json" <<'JSON'
+{
+  "active_pack": "peon",
+  "volume": 0.5,
+  "enabled": true,
+  "desktop_notifications": true,
+  "categories": {
+    "session.start": true,
+    "task.complete": true,
+    "task.error": true,
+    "input.required": true,
+    "resource.limit": true,
+    "user.spam": true
+  },
+  "annoyed_threshold": 3,
+  "annoyed_window_seconds": 10
+}
+JSON
+
+  # Create scripts dir and copy overlay script (use PEON_SH parent for source location)
+  mkdir -p "$TEST_DIR/scripts"
+  _src_dir="$(cd "$(dirname "$PEON_SH")" && pwd)"
+  cp "$_src_dir/scripts/mac-overlay.js" "$TEST_DIR/scripts/mac-overlay.js"
+}
+
+teardown() {
+  teardown_test_env
+}
+
+# Helper: check if overlay was called
+overlay_was_called() {
+  [ -f "$TEST_DIR/overlay.log" ] && [ -s "$TEST_DIR/overlay.log" ]
+}
+
+# Helper: get overlay log content
+overlay_log() {
+  cat "$TEST_DIR/overlay.log" 2>/dev/null
+}
+
+# ============================================================
+# Default behavior (overlay)
+# ============================================================
+
+@test "macOS overlay notification enabled by default" {
+  run_peon '{"hook_event_name":"Stop","cwd":"/tmp/myproject","session_id":"s1","permission_mode":"default"}'
+  [ "$PEON_EXIT" -eq 0 ]
+  overlay_was_called
+  [[ "$(overlay_log)" == *"-l JavaScript"* ]]
+  [[ "$(overlay_log)" == *"mac-overlay.js"* ]]
+}
+
+@test "macOS overlay passes message argument" {
+  run_peon '{"hook_event_name":"Stop","cwd":"/tmp/myproject","session_id":"s1","permission_mode":"default"}'
+  [ "$PEON_EXIT" -eq 0 ]
+  overlay_was_called
+  [[ "$(overlay_log)" == *"myproject"* ]]
+}
+
+@test "macOS overlay passes color argument" {
+  run_peon '{"hook_event_name":"Stop","cwd":"/tmp/myproject","session_id":"s1","permission_mode":"default"}'
+  [ "$PEON_EXIT" -eq 0 ]
+  overlay_was_called
+  # Stop events use blue color (task complete)
+  [[ "$(overlay_log)" == *"blue"* ]]
+}
+
+@test "macOS overlay works without icon file" {
+  rm -f "$TEST_DIR/docs/peon-icon.png" 2>/dev/null
+  run_peon '{"hook_event_name":"Stop","cwd":"/tmp/myproject","session_id":"s1","permission_mode":"default"}'
+  [ "$PEON_EXIT" -eq 0 ]
+  overlay_was_called
+}
+
+@test "macOS overlay passes icon path when icon exists" {
+  mkdir -p "$TEST_DIR/docs"
+  echo "fake-png" > "$TEST_DIR/docs/peon-icon.png"
+  run_peon '{"hook_event_name":"Stop","cwd":"/tmp/myproject","session_id":"s1","permission_mode":"default"}'
+  [ "$PEON_EXIT" -eq 0 ]
+  overlay_was_called
+  [[ "$(overlay_log)" == *"peon-icon.png"* ]]
+}
+
+# ============================================================
+# Standard mode fallback
+# ============================================================
+
+@test "macOS standard notification uses osascript display notification" {
+  cat > "$TEST_DIR/config.json" <<'JSON'
+{
+  "active_pack": "peon",
+  "volume": 0.5,
+  "enabled": true,
+  "desktop_notifications": true,
+  "notification_style": "standard",
+  "categories": {
+    "session.start": true,
+    "task.complete": true,
+    "task.error": true,
+    "input.required": true,
+    "resource.limit": true,
+    "user.spam": true
+  },
+  "annoyed_threshold": 3,
+  "annoyed_window_seconds": 10
+}
+JSON
+  run_peon '{"hook_event_name":"Stop","cwd":"/tmp/myproject","session_id":"s1","permission_mode":"default"}'
+  [ "$PEON_EXIT" -eq 0 ]
+  # Overlay should NOT be called
+  ! overlay_was_called
+  # Standard osascript notification should be called instead
+  [ -f "$TEST_DIR/osascript.log" ]
+}
+
+# ============================================================
+# CLI toggle
+# ============================================================
+
+@test "peon notifications overlay sets notification_style in config" {
+  bash "$PEON_SH" notifications overlay
+  python3 -c "
+import json
+cfg = json.load(open('$TEST_DIR/config.json'))
+assert cfg['notification_style'] == 'overlay', f'Expected overlay, got {cfg[\"notification_style\"]}'
+"
+}
+
+@test "peon notifications standard sets notification_style in config" {
+  bash "$PEON_SH" notifications standard
+  python3 -c "
+import json
+cfg = json.load(open('$TEST_DIR/config.json'))
+assert cfg['notification_style'] == 'standard', f'Expected standard, got {cfg[\"notification_style\"]}'
+"
+}
+
+@test "peon notifications overlay then standard toggles correctly" {
+  bash "$PEON_SH" notifications overlay
+  bash "$PEON_SH" notifications standard
+  python3 -c "
+import json
+cfg = json.load(open('$TEST_DIR/config.json'))
+assert cfg['notification_style'] == 'standard', f'Expected standard, got {cfg[\"notification_style\"]}'
+"
+}
+
+# ============================================================
+# Status display
+# ============================================================
+
+@test "peon status shows notification style" {
+  output=$(bash "$PEON_SH" status 2>/dev/null)
+  [[ "$output" == *"notification style overlay"* ]]
+}
+
+# ============================================================
+# Notification test command
+# ============================================================
+
+@test "peon notifications test sends overlay notification" {
+  output=$(PEON_TEST=1 bash "$PEON_SH" notifications test 2>/dev/null)
+  [[ "$output" == *"sending test notification"* ]]
+  overlay_was_called
+  [[ "$(overlay_log)" == *"test notification"* ]]
+}
+
+@test "peon notifications test sends standard notification" {
+  cat > "$TEST_DIR/config.json" <<'JSON'
+{
+  "active_pack": "peon",
+  "volume": 0.5,
+  "enabled": true,
+  "desktop_notifications": true,
+  "notification_style": "standard",
+  "categories": {}
+}
+JSON
+  output=$(PEON_TEST=1 bash "$PEON_SH" notifications test 2>/dev/null)
+  [[ "$output" == *"sending test notification"* ]]
+  ! overlay_was_called
+  [ -f "$TEST_DIR/osascript.log" ]
+}
+
+@test "peon notifications test errors when notifications are off" {
+  cat > "$TEST_DIR/config.json" <<'JSON'
+{
+  "active_pack": "peon",
+  "volume": 0.5,
+  "enabled": true,
+  "desktop_notifications": false,
+  "categories": {}
+}
+JSON
+  run bash "$PEON_SH" notifications test
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"desktop notifications are off"* ]]
+}
+
+# ============================================================
+# Status display
+# ============================================================
+
+@test "peon status shows standard when configured" {
+  cat > "$TEST_DIR/config.json" <<'JSON'
+{ "active_pack": "peon", "volume": 0.5, "enabled": true, "notification_style": "standard" }
+JSON
+  output=$(bash "$PEON_SH" status 2>/dev/null)
+  [[ "$output" == *"notification style standard"* ]]
+}

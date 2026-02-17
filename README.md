@@ -124,6 +124,9 @@ peon packs next           # Cycle to the next pack
 peon packs remove <p1,p2> # Remove specific packs
 peon notifications on     # Enable desktop notifications
 peon notifications off    # Disable desktop notifications
+peon notifications overlay   # Use large overlay banners (default)
+peon notifications standard  # Use standard system notifications
+peon notifications test      # Send a test notification
 peon preview              # Play all sounds from session.start
 peon preview <category>   # Play all sounds from a specific category
 peon preview --list       # List all categories in the active pack
@@ -171,7 +174,9 @@ Config location depends on install mode:
 
 - **volume**: 0.0–1.0 (quiet enough for the office)
 - **desktop_notifications**: `true`/`false` — toggle desktop notification popups independently from sounds (default: `true`)
-  - **wsl_toast**: `true`/`false` — on WSL, use native Windows toast notifications instead of the Windows Forms popup. Toasts don't steal focus and appear in the Action Center. (default: `true`)
+- **notification_style**: `"overlay"` or `"standard"` — controls how desktop notifications appear (default: `"overlay"`)
+  - **overlay**: large, visible banners — JXA Cocoa overlay on macOS, Windows Forms popup on WSL
+  - **standard**: system notifications — `osascript` / `terminal-notifier` on macOS, Windows toast on WSL
 - **categories**: Toggle individual CESP sound categories on/off (e.g. `"session.start": false` to disable greeting sounds)
 - **annoyed_threshold / annoyed_window_seconds**: How many prompts in N seconds triggers the `user.spam` easter egg
 - **silent_window_seconds**: Suppress `task.complete` sounds and notifications for tasks shorter than N seconds. (e.g. `10` to only hear sounds for tasks that take longer than 10 seconds)
@@ -263,7 +268,7 @@ The installer copies `peon-ping.ts` to `~/.config/opencode/plugins/` and creates
 
 - **Sound playback** via `afplay` (macOS), `pw-play`/`paplay`/`ffplay` (Linux) — same priority chain as the shell hook
 - **CESP event mapping** — `session.created` / `session.idle` / `session.error` / `permission.asked` / rapid prompt detection all map to standard CESP categories
-- **Desktop notifications** — rich notifications via [`terminal-notifier`](https://github.com/julienXX/terminal-notifier) when available (subtitle, per-project grouping), with `osascript` fallback. Fires only when the terminal is not focused.
+- **Desktop notifications** — large overlay banners by default (JXA Cocoa, visible on all screens), or standard notifications via [`terminal-notifier`](https://github.com/julienXX/terminal-notifier) / `osascript`. Fires only when the terminal is not focused.
 - **Terminal focus detection** — checks if your terminal app (Terminal, iTerm2, Warp, Alacritty, kitty, WezTerm, ghostty, Hyper) is frontmost via AppleScript before sending notifications
 - **Tab titles** — updates the terminal tab to show task status (`● project: working...` / `✓ project: done` / `✗ project: error`)
 - **Pack switching** — reads `active_pack` from config, loads the pack's `openpeon.json` manifest at runtime
@@ -525,7 +530,7 @@ powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.claude\hooks\peon-pi
 
 ## Requirements
 
-- **macOS** — `afplay` (built-in), AppleScript for notifications
+- **macOS** — `afplay` (built-in), JXA Cocoa overlay or AppleScript for notifications
 - **Linux** — one of: `pw-play`, `paplay`, `ffplay`, `mpv`, `play` (SoX), or `aplay`; `notify-send` for notifications
 - **Windows** — native PowerShell with `MediaPlayer` and WinForms (no WSL required), or WSL2
 - **All platforms** — `python3` (not required for native Windows)

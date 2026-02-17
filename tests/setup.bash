@@ -133,12 +133,15 @@ SCRIPT
     chmod +x "$MOCK_BIN/$player"
   done
 
-  # Mock osascript — log calls instead of running AppleScript
+  # Mock osascript — log calls instead of running AppleScript/JXA
   cat > "$MOCK_BIN/osascript" <<'SCRIPT'
 #!/bin/bash
 # For the frontmost app check, return "Safari" (not a terminal) so notifications fire
 if [[ "$*" == *"frontmost"* ]]; then
   echo "Safari"
+elif [[ "$1" == "-l" ]] && [[ "$2" == "JavaScript" ]]; then
+  # JXA overlay call — log to overlay.log with full arguments
+  echo "$@" >> "${CLAUDE_PEON_DIR}/overlay.log"
 else
   echo "$@" >> "${CLAUDE_PEON_DIR}/osascript.log"
 fi

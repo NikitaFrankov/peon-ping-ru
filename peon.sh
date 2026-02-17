@@ -236,55 +236,74 @@ send_notification() {
 
   case "$PLATFORM" in
     mac)
-      # Use terminal-native escape sequences where supported (shows terminal icon).
-      # Falls back to terminal-notifier (with peon icon) or osascript.
-      case "${TERM_PROGRAM:-}" in
-        iTerm.app)
-          # iTerm2 OSC 9 — notification with iTerm2 icon
-          # Write to /dev/tty to bypass Claude Code stdout capture
-          printf '\e]9;%s\007' "$title: $msg" > /dev/tty 2>/dev/null || true
-          ;;
-        kitty)
-          # Kitty OSC 99
-          printf '\e]99;i=peon:d=0;%s\e\\' "$title: $msg" > /dev/tty 2>/dev/null || true
-          ;;
-        *)
-          if command -v terminal-notifier &>/dev/null && [ -f "$icon_path" ]; then
-            # terminal-notifier supports custom icon (brew install terminal-notifier)
-            if [ "$use_bg" = true ]; then
-              nohup terminal-notifier \
-                -title "$title" \
-                -message "$msg" \
-                -appIcon "$icon_path" \
-                -group "peon-ping" >/dev/null 2>&1 &
-            else
-              terminal-notifier \
-                -title "$title" \
-                -message "$msg" \
-                -appIcon "$icon_path" \
-                -group "peon-ping" >/dev/null 2>&1
-            fi
-          else
-            # Terminal.app, Warp, Ghostty, etc. — no native escape; use osascript
-            if [ "$use_bg" = true ]; then
-              nohup osascript - "$msg" "$title" >/dev/null 2>&1 <<'APPLESCRIPT' &
-on run argv
-  display notification (item 1 of argv) with title (item 2 of argv)
-end run
-APPLESCRIPT
-            else
-              osascript - "$msg" "$title" >/dev/null 2>&1 <<'APPLESCRIPT'
-on run argv
-  display notification (item 1 of argv) with title (item 2 of argv)
-end run
-APPLESCRIPT
-            fi
+      if [ "${NOTIF_STYLE:-overlay}" = "overlay" ]; then
+        # JXA Cocoa overlay — large, visible banner on all screens
+        local overlay_script="$PEON_DIR/scripts/mac-overlay.js"
+        local icon_arg=""
+        [ -f "$icon_path" ] && icon_arg="$icon_path"
+        _run_overlay() (
+          slot_dir="/tmp/peon-ping-popups"; mkdir -p "$slot_dir"
+          slot=0
+          while [ "$slot" -lt 5 ] && ! mkdir "$slot_dir/slot-$slot" 2>/dev/null; do
+            slot=$((slot + 1))
+          done
+          if [ "$slot" -ge 5 ]; then
+            find "$slot_dir" -maxdepth 1 -name 'slot-*' -mmin +1 -exec rm -rf {} + 2>/dev/null
+            slot=0; mkdir -p "$slot_dir/slot-0"
           fi
-          ;;
-      esac
+          osascript -l JavaScript "$overlay_script" "$msg" "$color" "$icon_arg" "$slot" "4" >/dev/null 2>&1 || true
+          rm -rf "$slot_dir/slot-$slot"
+        )
+        if [ "$use_bg" = true ]; then _run_overlay & else _run_overlay; fi
+      else
+        # Standard notifications: terminal-native escape sequences or system notifications
+        case "${TERM_PROGRAM:-}" in
+          iTerm.app)
+            # iTerm2 OSC 9 — notification with iTerm2 icon
+            printf '\e]9;%s\007' "$title: $msg" > /dev/tty 2>/dev/null || true
+            ;;
+          kitty)
+            # Kitty OSC 99
+            printf '\e]99;i=peon:d=0;%s\e\\' "$title: $msg" > /dev/tty 2>/dev/null || true
+            ;;
+          *)
+            if command -v terminal-notifier &>/dev/null && [ -f "$icon_path" ]; then
+              # terminal-notifier supports custom icon (brew install terminal-notifier)
+              if [ "$use_bg" = true ]; then
+                nohup terminal-notifier \
+                  -title "$title" \
+                  -message "$msg" \
+                  -appIcon "$icon_path" \
+                  -group "peon-ping" >/dev/null 2>&1 &
+              else
+                terminal-notifier \
+                  -title "$title" \
+                  -message "$msg" \
+                  -appIcon "$icon_path" \
+                  -group "peon-ping" >/dev/null 2>&1
+              fi
+            else
+              # Terminal.app, Warp, Ghostty, etc. — no native escape; use osascript
+              if [ "$use_bg" = true ]; then
+                nohup osascript - "$msg" "$title" >/dev/null 2>&1 <<'APPLESCRIPT' &
+on run argv
+  display notification (item 1 of argv) with title (item 2 of argv)
+end run
+APPLESCRIPT
+              else
+                osascript - "$msg" "$title" >/dev/null 2>&1 <<'APPLESCRIPT'
+on run argv
+  display notification (item 1 of argv) with title (item 2 of argv)
+end run
+APPLESCRIPT
+              fi
+            fi
+            ;;
+        esac
+      fi
       ;;
     wsl)
-      if [ "${WSL_TOAST:-true}" = "true" ]; then
+      if [ "${NOTIF_STYLE:-overlay}" = "standard" ]; then
         # Windows toast notification (no focus stealing, appears in Action Center)
         local tmpdir
         tmpdir=$(powershell.exe -NoProfile -NonInteractive -Command '[System.IO.Path]::GetTempPath()' 2>/dev/null | tr -d '\r')
@@ -312,16 +331,19 @@ APPLESCRIPT
         cat > "${tmpdir_wsl}peon-toast.xml" <<TOASTEOF
 <toast duration="short"><visual><binding template="ToastGeneric"><text>${toast_body}</text><text>${toast_title}</text>${icon_xml}</binding></visual><audio silent="true" /></toast>
 TOASTEOF
-        setsid powershell.exe -NoProfile -NonInteractive -Command '
-          [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-          [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom, ContentType = WindowsRuntime] | Out-Null
-          $APP_ID = "{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe"
-          $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
-          $xml.LoadXml((Get-Content ($env:TEMP + "\peon-toast.xml") -Raw -Encoding UTF8))
-          $toast = New-Object Windows.UI.Notifications.ToastNotification $xml
-          [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($APP_ID).Show($toast)
-          Remove-Item ($env:TEMP + "\peon-toast.xml") -ErrorAction SilentlyContinue
-        ' &>/dev/null &
+        _run_toast() {
+          setsid powershell.exe -NoProfile -NonInteractive -Command '
+            [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+            [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom, ContentType = WindowsRuntime] | Out-Null
+            $APP_ID = "{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe"
+            $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+            $xml.LoadXml((Get-Content ($env:TEMP + "\peon-toast.xml") -Raw -Encoding UTF8))
+            $toast = New-Object Windows.UI.Notifications.ToastNotification $xml
+            [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($APP_ID).Show($toast)
+            Remove-Item ($env:TEMP + "\peon-toast.xml") -ErrorAction SilentlyContinue
+          ' &>/dev/null
+        }
+        if [ "$use_bg" = true ]; then _run_toast & else _run_toast; fi
       else
         # Legacy Windows Forms popup
         local rgb_r=180 rgb_g=0 rgb_b=0
@@ -338,9 +360,13 @@ TOASTEOF
           slot_dir="/tmp/peon-ping-popups"
           mkdir -p "$slot_dir"
           slot=0
-          while ! mkdir "$slot_dir/slot-$slot" 2>/dev/null; do
+          while [ "$slot" -lt 5 ] && ! mkdir "$slot_dir/slot-$slot" 2>/dev/null; do
             slot=$((slot + 1))
           done
+          if [ "$slot" -ge 5 ]; then
+            find "$slot_dir" -maxdepth 1 -name 'slot-*' -mmin +1 -exec rm -rf {} + 2>/dev/null
+            slot=0; mkdir -p "$slot_dir/slot-0"
+          fi
           y_offset=$((40 + slot * 90))
           powershell.exe -NoProfile -NonInteractive -Command "
             Add-Type -AssemblyName System.Windows.Forms
@@ -658,6 +684,8 @@ except Exception:
 
 dn = c.get('desktop_notifications', True)
 print('peon-ping: desktop notifications ' + ('on' if dn else 'off'))
+ns = c.get('notification_style', 'overlay')
+print('peon-ping: notification style ' + ns)
 
 mn = c.get('mobile_notify', {})
 if mn and mn.get('service'):
@@ -756,8 +784,56 @@ json.dump(cfg, open(config_path, 'w'), indent=2)
 print('peon-ping: desktop notifications off')
 "
         sync_adapter_configs; exit 0 ;;
+      overlay)
+        python3 -c "
+import json
+config_path = '$CONFIG'
+try:
+    cfg = json.load(open(config_path))
+except Exception:
+    cfg = {}
+cfg['notification_style'] = 'overlay'
+json.dump(cfg, open(config_path, 'w'), indent=2)
+print('peon-ping: notification style set to overlay')
+"
+        sync_adapter_configs; exit 0 ;;
+      standard)
+        python3 -c "
+import json
+config_path = '$CONFIG'
+try:
+    cfg = json.load(open(config_path))
+except Exception:
+    cfg = {}
+cfg['notification_style'] = 'standard'
+json.dump(cfg, open(config_path, 'w'), indent=2)
+print('peon-ping: notification style set to standard')
+"
+        sync_adapter_configs; exit 0 ;;
+      test)
+        # Read config to check if notifications are enabled and get style
+        eval "$(python3 -c "
+import json, shlex
+q = shlex.quote
+config_path = '$CONFIG'
+try:
+    cfg = json.load(open(config_path))
+except Exception:
+    cfg = {}
+dn = cfg.get('desktop_notifications', True)
+ns = cfg.get('notification_style', 'overlay')
+print('_NOTIF_ENABLED=' + ('true' if dn else 'false'))
+print('NOTIF_STYLE=' + q(ns))
+")"
+        if [ "$_NOTIF_ENABLED" != "true" ]; then
+          echo "peon-ping: desktop notifications are off (run 'peon notifications on' to enable)" >&2
+          exit 1
+        fi
+        echo "peon-ping: sending test notification (style: $NOTIF_STYLE)"
+        PEON_TEST=1 send_notification "This is a test notification" "peon-ping" "blue"
+        exit 0 ;;
       *)
-        echo "Usage: peon notifications <on|off>" >&2; exit 1 ;;
+        echo "Usage: peon notifications <on|off|overlay|standard|test>" >&2; exit 1 ;;
     esac ;;
   packs)
     case "${2:-}" in
@@ -1375,8 +1451,11 @@ Commands:
   resume               Unmute sounds
   toggle               Toggle mute on/off
   status               Check if paused or active
-  notifications on     Enable desktop notifications
-  notifications off    Disable desktop notifications
+  notifications on        Enable desktop notifications
+  notifications off       Disable desktop notifications
+  notifications overlay   Use large overlay banners (default)
+  notifications standard  Use standard system notifications
+  notifications test      Send a test notification
   preview [category]   Play all sounds from a category (default: session.start)
   preview --list       List all categories and sound counts in the active pack
                        Categories: session.start, task.acknowledge, task.complete,
@@ -2133,7 +2212,7 @@ print('NOTIFY=' + q(notify))
 print('NOTIFY_COLOR=' + q(notify_color))
 print('MSG=' + q(msg))
 print('DESKTOP_NOTIF=' + ('true' if desktop_notif else 'false'))
-print('WSL_TOAST=' + ('true' if cfg.get('wsl_toast', True) else 'false'))
+print('NOTIF_STYLE=' + q(cfg.get('notification_style', 'overlay')))
 print('LINUX_AUDIO_PLAYER=' + q(linux_audio_player))
 mn = cfg.get('mobile_notify', {})
 mobile_on = bool(mn and mn.get('service') and mn.get('enabled', True))
