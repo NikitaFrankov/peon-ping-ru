@@ -8,9 +8,9 @@
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-hook-ffab01) ![Codex](https://img.shields.io/badge/Codex-adapter-ffab01) ![Cursor](https://img.shields.io/badge/Cursor-adapter-ffab01) ![OpenCode](https://img.shields.io/badge/OpenCode-adapter-ffab01) ![Kilo CLI](https://img.shields.io/badge/Kilo_CLI-adapter-ffab01) ![Kiro](https://img.shields.io/badge/Kiro-adapter-ffab01) ![Windsurf](https://img.shields.io/badge/Windsurf-adapter-ffab01) ![Antigravity](https://img.shields.io/badge/Antigravity-adapter-ffab01) ![OpenClaw](https://img.shields.io/badge/OpenClaw-adapter-ffab01)
 
-**当你的 AI 编程助手需要关注时，播放游戏角色语音 — 或通过 MCP 让 AI 自行选择音效。**
+**当你的 AI 编程助手需要关注时，播放游戏角色语音 + 显示视觉覆盖通知 — 或通过 MCP 让 AI 自行选择音效。**
 
-AI 编程助手完成任务或需要权限时不会通知你。你切换标签页、失去焦点，然后浪费 15 分钟重新进入状态。peon-ping 通过魔兽争霸、星际争霸、传送门、塞尔达等游戏的角色语音来解决这个问题 — 支持 **Claude Code**、**Codex**、**Cursor**、**OpenCode**、**Kilo CLI**、**Kiro**、**Windsurf**、**Google Antigravity**、**OpenClaw** 及任何 MCP 客户端。
+AI 编程助手完成任务或需要权限时不会通知你。你切换标签页、失去焦点，然后浪费 15 分钟重新进入状态。peon-ping 通过魔兽争霸、星际争霸、传送门、塞尔达等游戏的角色语音和醒目的屏幕横幅来解决这个问题 — 支持 **Claude Code**、**Codex**、**Cursor**、**OpenCode**、**Kilo CLI**、**Kiro**、**Windsurf**、**Google Antigravity**、**OpenClaw** 及任何 MCP 客户端。
 
 **查看演示** &rarr; [peonping.com](https://peonping.com/)
 
@@ -97,7 +97,7 @@ cd peon-ping
 | 速率或 token 限制 | `resource.limit` | *"Zug zug."*（取决于语音包）|
 | 快速提示（10秒内3次以上）| `user.spam` | *"Me busy, leave me alone!"* |
 
-此外，当终端未获得焦点时，还会显示终端标签页标题（`● 项目: 完成`）和桌面通知。
+此外，还会在每个屏幕上显示**大型覆盖横幅**（macOS/WSL）和终端标签页标题（`● 项目: 完成`）——即使你在其他应用中，也能立即知道任务完成。
 
 peon-ping 实现了 [编码事件语音包规范（CESP）](https://github.com/PeonPing/openpeon) — 这是一个任何代理式 IDE 都可以采用的编码事件声音开放标准。
 

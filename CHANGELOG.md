@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.3.0 (2026-02-18)
+
+### Added
+- `peon volume [0.0-1.0]` CLI command — get or set volume from the terminal
+- `peon rotation [random|round-robin|agentskill]` CLI command — get or set pack rotation mode from the terminal
+
+### Fixed
+- macOS overlay (`mac-overlay.js`) is now correctly copied during install — previously only `.sh`/`.ps1`/`.swift` scripts were copied, so the visual overlay banner never appeared
+- Resume sessions (`source: "resume"`) preserve the active voice pack instead of picking a new random one
+
+### Changed
+- Default pack set reduced to 5 curated WC/SC/Portal packs: `peon`, `peasant`, `sc_kerrigan`, `sc_battlecruiser`, `glados`
+
 ## v2.2.3 (2026-02-18)
 
 ### Changed
