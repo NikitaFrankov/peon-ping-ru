@@ -74,6 +74,7 @@ export interface PeonConfig {
   active_pack: string
   volume: number
   enabled: boolean
+  desktop_notifications: boolean
   use_sound_effects_device: boolean
   categories: Partial<Record<CESPCategory, boolean>>
   spam_threshold: number
@@ -142,6 +143,7 @@ export const DEFAULT_CONFIG: PeonConfig = {
   active_pack: "peon",
   volume: 0.5,
   enabled: true,
+  desktop_notifications: true,
   use_sound_effects_device: true,
   categories: {
     "session.start": true,

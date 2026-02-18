@@ -91,6 +91,7 @@ interface PeonConfig {
   active_pack: string
   volume: number
   enabled: boolean
+  desktop_notifications: boolean
   use_sound_effects_device: boolean
   categories: Partial<Record<CESPCategory, boolean>>
   spam_threshold: number
@@ -156,6 +157,7 @@ const DEFAULT_CONFIG: PeonConfig = {
   active_pack: "peon",
   volume: 0.5,
   enabled: true,
+  desktop_notifications: true,
   use_sound_effects_device: true,
   categories: {
     "session.start": true,
@@ -765,8 +767,8 @@ export const PeonPingPlugin: Plugin = async ({ directory }) => {
       }
     }
 
-    // Desktop notification (only when terminal is NOT focused)
-    if (notify && !paused) {
+    // Desktop notification (only when enabled and terminal is NOT focused)
+    if (notify && !paused && config.desktop_notifications !== false) {
       const focused = await isTerminalFocused()
       if (!focused) {
         const title = notifyTitle || `${marker}${projectName}: ${status}`
