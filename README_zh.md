@@ -94,6 +94,7 @@ cd peon-ping
 | 会话开始 | `session.start` | *"Ready to work?"*, *"Yes?"*, *"What you want?"* |
 | 任务完成 | `task.complete` | *"Work, work."*, *"I can do that."*, *"Okie dokie."* |
 | 需要权限 | `input.required` | *"Something need doing?"*, *"Hmm?"*, *"What you want?"* |
+| 速率或 token 限制 | `resource.limit` | *"Zug zug."*（取决于语音包）|
 | 快速提示（10秒内3次以上）| `user.spam` | *"Me busy, leave me alone!"* |
 
 此外，当终端未获得焦点时，还会显示终端标签页标题（`● 项目: 完成`）和桌面通知。

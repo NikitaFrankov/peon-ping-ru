@@ -96,6 +96,7 @@ cd peon-ping
 | Permission needed | `input.required` | *"Something need doing?"*, *"Hmm?"*, *"What you want?"* |
 | Tool or command error | `task.error` | *"I can't do that."*, *"Son of a bitch!"* |
 | Agent acknowledged task | `task.acknowledge` | *"I read you."*, *"On it."* *(disabled by default)* |
+| Rate or token limit hit | `resource.limit` | *"Zug zug."* *(pack dependent)* |
 | Rapid prompts (3+ in 10s) | `user.spam` | *"Me busy, leave me alone!"* |
 
 Plus Terminal tab titles (`● project: done`) and desktop notifications when your terminal isn't focused.
