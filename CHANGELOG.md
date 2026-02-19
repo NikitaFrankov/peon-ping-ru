@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.7.0 (2026-02-19)
+
+### Added
+- `path_rules` config array: glob-pattern-based CWD-to-pack assignment (layer 3 in override hierarchy)
+- Click-to-focus terminal on macOS notification click — overlay style detects terminal via `TERM_PROGRAM` → bundle ID mapping (Ghostty, Warp, iTerm2, Terminal.app); standard style uses `terminal-notifier` with `-activate`
+- IDE PID detection (`_mac_ide_pid()`) for Cursor/Windsurf/Zed/VS Code ancestor click-to-focus
+
+### Changed
+- `active_pack` → `default_pack` (backward-compat fallback + `peon update` migration)
+- `agentskill` rotation mode → `session_override` (`agentskill` accepted as alias)
+- Override hierarchy (high→low): `session_override` > local project config > `path_rules` > `pack_rotation` > `default_pack`
+
+# Changelog
+
 ## v2.6.0 (2026-02-19)
 
 ### Added
