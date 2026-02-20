@@ -2254,7 +2254,7 @@ elif event == 'Stop':
         marker = '\u25cf '
         notify = '1'
         notify_color = 'blue'
-        msg = project + '  \u2014  Task complete'
+        msg = project + '  —  Работа завершена, хозяин'
     else:
         category = ''
 elif event == 'Notification':
@@ -2267,7 +2267,7 @@ elif event == 'Notification':
         marker = '\u25cf '
         notify = '1'
         notify_color = 'yellow'
-        msg = project + '  \u2014  Waiting for input'
+        msg = project + '  —  Че делать, хозяин?'
     else:
         print('PEON_EXIT=true')
         sys.exit(0)
@@ -2277,7 +2277,7 @@ elif event == 'PermissionRequest':
     marker = '\u25cf '
     notify = '1'
     notify_color = 'red'
-    msg = project + '  \u2014  Permission needed'
+    msg = project + '  —  Жду разрешения, хозяин'
 elif event == 'PostToolUseFailure':
     # Bash failures arrive here with error field (e.g. Exit code 1)
     tool_name = event_data.get('tool_name', '')
