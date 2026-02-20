@@ -3,7 +3,7 @@
 # Used by install.sh and `peon packs install`
 set -euo pipefail
 
-REGISTRY_URL="https://peonping.github.io/registry/index.json"
+REGISTRY_URL="https://raw.githubusercontent.com/NikitaFrankov/peon-ping-ru/main/registry/index.json"
 
 # Fallback pack list (used if registry is unreachable)
 FALLBACK_PACKS="acolyte_de acolyte_ru aoe2 aom_greek brewmaster_ru dota2_axe duke_nukem glados hd2_helldiver molag_bal murloc ocarina_of_time peon peon_cz peon_de peon_es peon_fr peon_pl peon_ru peasant peasant_cz peasant_es peasant_fr peasant_ru ra2_kirov ra2_soviet_engineer ra_soviet rick sc_battlecruiser sc_firebat sc_kerrigan sc_medic sc_scv sc_tank sc_terran sc_vessel sheogorath sopranos tf2_engineer wc2_peasant"
