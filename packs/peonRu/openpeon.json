@@ -78,7 +78,7 @@
         },
         {
           "file": "sounds/PeonDeathRu.wav",
-          "label": "Агх!"
+          "label": "*Смерть орка*"
         }
       ]
     },
@@ -97,17 +97,13 @@
     "resource.limit": {
       "sounds": [
         {
-          "file": "sounds/PeonAngry1Ru.wav",
-          "label": "Чего?!!"
+          "file": "sounds/PeonDeathRu.wav",
+          "label": "*Смерть орка*"
         }
       ]
     },
     "user.spam": {
       "sounds": [
-        {
-          "file": "sounds/PeonAngry1Ru.wav",
-          "label": "Чего?!!"
-        },
         {
           "file": "sounds/PeonAngry2Ru.wav",
           "label": "Не мешай, я занят"
