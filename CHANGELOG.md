@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.7.6 (2026-02-23)
+
+### Fixed
+- Updated notification icons in sound packs (peonRu, peasantRu)
+
 ## v2.7.5 (2026-02-23)
 
 ### Changed
