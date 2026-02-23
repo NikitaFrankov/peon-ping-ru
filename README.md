@@ -48,12 +48,28 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/NikitaFrankov/peon-pin
 
 ### Homebrew (macOS, Linux)
 
+**Шаг 1: Установка**
+
 ```bash
 brew tap NikitaFrankov/tap
 brew install peon-ping-ru
 ```
 
-Обновление:
+**Шаг 2: Настройка хуков (ОБЯЗАТЕЛЬНО)**
+
+```bash
+peon-ping-ru-setup
+```
+
+**Проверка:**
+
+```bash
+peon status
+```
+
+Должно показать: `peon-ping: active`
+
+**Обновление:**
 
 ```bash
 brew update && brew upgrade peon-ping-ru
