@@ -51,8 +51,12 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/NikitaFrankov/peon-pin
 **Шаг 1: Установка**
 
 ```bash
+# Вариант A: Двумя командами
 brew tap NikitaFrankov/tap
 brew install peon-ping-ru
+
+# Вариант B: Одной командой
+brew install NikitaFrankov/tap/peon-ping-ru
 ```
 
 **Шаг 2: Настройка хуков (ОБЯЗАТЕЛЬНО)**
