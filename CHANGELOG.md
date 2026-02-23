@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.7.5 (2026-02-23)
+
+### Changed
+- Updated notification icon
+- Setup script now links docs folder with icon
+- Improved Homebrew formula: added livecheck, completions, enhanced tests
+
 ## v2.7.3 (2026-02-22)
 
 ### Added
